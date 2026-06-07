@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaceAttend — Principal Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0a0e1a;--sidebar:#0d1120;--main:#0f1628;--glass:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#4f8aff;--accent2:#7c3aed;--success:#34d399;--danger:#f87171;--warn:#fbbf24;--text:#e8eaf6;--muted:#7986a3;--card:#141c30}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+  .sidebar{width:240px;min-height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;position:fixed;top:0;left:0;bottom:0;z-index:100}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:32px}
+  .brand-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .brand h1{font-size:1.1rem;font-weight:700;color:var(--text)}
+  .brand p{font-size:0.7rem;color:var(--muted)}
+  .nav-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:0 12px;margin:16px 0 6px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:0.88rem;font-weight:500;transition:all 0.18s;margin-bottom:2px}
+  .nav-item:hover,.nav-item.active{background:rgba(79,138,255,0.12);color:var(--text)}
+  .nav-item .icon{font-size:16px;width:22px;text-align:center}
+  .spacer{flex:1}
+  .user-card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px}
+  .user-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:16px}
+  .user-info h4{font-size:0.82rem;font-weight:600;color:var(--text)}
+  .user-info p{font-size:0.7rem;color:var(--muted)}
+
+  .main{margin-left:240px;flex:1;padding:32px;background:var(--main)}
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px}
+  .page-header h2{font-size:1.5rem;font-weight:700;color:var(--text)}
+  .page-header p{font-size:0.83rem;color:var(--muted);margin-top:2px}
+
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;transition:transform 0.2s}
+  .stat-card:hover{transform:translateY(-3px)}
+  .stat-icon{font-size:24px;margin-bottom:10px}
+  .stat-value{font-size:2rem;font-weight:800;line-height:1;margin-bottom:4px}
+  .stat-label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px}
+  .stat-card.blue .stat-value{color:var(--accent)}
+  .stat-card.green .stat-value{color:var(--success)}
+  .stat-card.red .stat-value{color:var(--danger)}
+  .stat-card.gold .stat-value{color:var(--warn)}
+
+  .progress-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:24px}
+  .progress-label{display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.85rem;color:var(--muted)}
+  .progress-label strong{color:var(--text);font-size:1rem}
+  .progress-track{height:12px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--success));transition:width 1.2s cubic-bezier(0.23,1,0.32,1)}
+
+  .controls{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end}
+  .controls .field label{display:block;font-size:0.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px}
+  input[type=date],input[type=text]{padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s}
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,138,255,0.15)}
+
+  .btn{padding:10px 18px;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 4px 16px rgba(79,138,255,0.30)}
+  .btn-danger{background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.30)}
+  .btn-danger:hover{background:rgba(248,113,113,0.25)}
+  .btn-sm{padding:6px 12px;font-size:0.78rem}
+  .btn-reset{background:rgba(248,113,113,0.10);color:var(--danger);border:1px solid rgba(248,113,113,0.25);font-size:0.82rem}
+  .btn-reset:hover{background:rgba(248,113,113,0.20)}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
+  .panel h3{font-size:0.95rem;font-weight:700;margin-bottom:16px}
+
+  table{width:100%;border-collapse:collapse}
+  th{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+  td{padding:10px 12px;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(255,255,255,0.025)}
+
+  .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-size:0.72rem;font-weight:600}
+  .badge-green{background:rgba(52,211,153,0.15);color:var(--success)}
+  .badge-red{background:rgba(248,113,113,0.15);color:var(--danger)}
+  .badge-blue{background:rgba(79,138,255,0.15);color:var(--accent)}
+
+  /* Add student modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center}
+  .modal-overlay.show{display:flex}
+  .modal{background:#141c30;border:1px solid var(--border);border-radius:20px;padding:32px;width:480px;backdrop-filter:blur(20px)}
+  .modal h3{font-size:1.1rem;font-weight:700;margin-bottom:20px}
+  .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal .field{margin-bottom:12px}
+  .modal .field label{display:block;font-size:0.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px}
+  .modal input{width:100%;padding:10px 13px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:0.88rem;outline:none}
+  .modal input:focus{border-color:var(--accent)}
+  .modal-actions{display:flex;gap:10px;margin-top:20px}
+  .btn-ghost{background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:var(--text)}
+
+  .chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
+  .chart-wrap h3{font-size:0.95rem;font-weight:700;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<!-- Add Student Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h3>➕ Add New Student</h3>
+    <form action="/add_student" method="post">
+      <div class="modal-grid">
+        <div class="field"><label>Full Name</label><input type="text" name="name" placeholder="Full name" required></div>
+        <div class="field"><label>Enrollment</label><input type="text" name="enrollment" placeholder="2024CS001" required></div>
+        <div class="field"><label>Department</label><input type="text" name="department" placeholder="Computer Science" required></div>
+        <div class="field"><label>Year</label><input type="text" name="year" placeholder="1st Year" required></div>
+        <div class="field"><label>Username</label><input type="text" name="username" placeholder="Username" required></div>
+        <div class="field"><label>Password</label><input type="password" name="password" placeholder="Password" required></div>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-primary">✅ Add Student</button>
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('show')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<nav class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">🏛️</div>
+    <div><h1>FaceAttend</h1><p>Principal Panel</p></div>
+  </div>
+  <span class="nav-label">Navigation</span>
+  <a href="/principal" class="nav-item active"><span class="icon">📊</span>Dashboard</a>
+  <a href="#" class="nav-item" onclick="document.getElementById('addModal').classList.add('show')"><span class="icon">➕</span>Add Student</a>
+  <div class="spacer"></div>
+  <div class="user-card">
+    <div class="user-avatar">🏛️</div>
+    <div class="user-info"><h4>Principal</h4><p>Admin Account</p></div>
+  </div>
+  <a href="/logout" class="nav-item" style="margin-top:8px;color:var(--danger)"><span class="icon">🚪</span>Logout</a>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <h2>Principal Dashboard</h2>
+      <p>Full institution attendance overview</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('show')">➕ Add Student</button>
+      <a href="/system_reset" onclick="return confirm('⚠️ This will DELETE all students and data. Are you sure?')" class="btn btn-reset">🔥 Reset System</a>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="cards">
+    <div class="stat-card blue">
+      <div class="stat-icon">🏫</div>
+      <div class="stat-value">{{ total_students }}</div>
+      <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value">{{ present_students }}</div>
+      <div class="stat-label">Present Today</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">❌</div>
+      <div class="stat-value">{{ absent_students }}</div>
+      <div class="stat-label">Absent Today</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon">📈</div>
+      <div class="stat-value">{{ percent }}%</div>
+      <div class="stat-label">Attendance Rate</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Institution Attendance</span>
+      <strong>{{ percent }}% — {{ present_students }}/{{ total_students }} present</strong>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="field">
+      <label>Filter by Date</label>
+      <form action="/principal_date_filter" method="post" style="display:flex;gap:8px">
+        <input type="date" name="date">
+        <button type="submit" class="btn btn-primary">Filter</button>
+      </form>
+    </div>
+    <div class="field">
+      <label>Search Student</label>
+      <input type="text" id="searchInput" placeholder="🔍  Search by name or enrollment...">
+    </div>
+  </div>
+
+  <!-- TABLES -->
+  <div class="two-col">
+    <div class="panel">
+      <h3>✅ Present Today <span class="badge badge-green">{{ present_students }}</span></h3>
+      {% if plist %}
+      <table>
+        <thead><tr><th>Name</th></tr></thead>
+        <tbody>
+          {% for s in plist %}
+          <tr><td>{{ s | title }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="text-align:center;padding:24px;color:var(--muted);font-size:0.85rem">No students present yet</div>
+      {% endif %}
+    </div>
+
+    <div class="panel">
+      <h3>❌ Absent Today <span class="badge badge-red">{{ absent_students }}</span></h3>
+      {% if alist %}
+      <table>
+        <thead><tr><th>Name</th></tr></thead>
+        <tbody>
+          {% for s in alist %}
+          <tr><td>{{ s | title }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="text-align:center;padding:24px;color:var(--muted);font-size:0.85rem">🎉 All present!</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ALL STUDENTS TABLE -->
+  <div class="panel" style="margin-bottom:20px">
+    <h3>📋 All Registered Students <span class="badge badge-blue">{{ total_students }}</span></h3>
+    <table id="studentsTable">
+      <thead>
+        <tr><th>#</th><th>Name</th><th>Enrollment</th><th>Department</th><th>Year</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td style="color:var(--muted)">{{ loop.index }}</td>
+          <td style="font-weight:600">{{ s[0] | title }}</td>
+          <td><span class="badge badge-blue">{{ s[1] }}</span></td>
+          <td>{{ s[2] }}</td>
+          <td>{{ s[3] }}</td>
+          <td style="display:flex;gap:8px">
+            <a href="/edit_student/{{ s[1] }}" class="btn btn-primary btn-sm">✏️ Edit</a>
+            <a href="/delete_student/{{ s[1] }}" onclick="return confirm('Delete this student?')" class="btn btn-danger btn-sm">🗑️ Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CHART -->
+  <div class="chart-wrap">
+    <h3>📊 Attendance Overview</h3>
+    <canvas id="chart" height="90"></canvas>
+  </div>
+</main>
+
+<script>
+  setTimeout(() => {
+    document.getElementById('progressBar').style.width = '{{ percent }}%';
+  }, 300);
+
+  document.getElementById('searchInput').addEventListener('keyup', function() {
+    const val = this.value.toLowerCase();
+    document.querySelectorAll('#studentsTable tbody tr').forEach(row => {
+      row.style.display = row.innerText.toLowerCase().includes(val) ? '' : 'none';
+    });
+  });
+
+  new Chart(document.getElementById('chart'), {
+    type: 'bar',
+    data: {
+      labels: ['Present', 'Absent'],
+      datasets: [{
+        label: 'Students',
+        data: [Number('{{ present_students }}'), Number('{{ absent_students }}')],
+        backgroundColor: ['rgba(52,211,153,0.75)', 'rgba(248,113,113,0.75)'],
+        borderColor: ['rgba(52,211,153,1)', 'rgba(248,113,113,1)'],
+        borderWidth: 2,
+        borderRadius: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7986a3', font: { family: 'Outfit' } } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7986a3', font: { family: 'Outfit' } } }
+      }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaceAttend — Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0a0e1a;--sidebar:#0d1120;--main:#0f1628;--glass:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#4f8aff;--accent2:#7c3aed;--success:#34d399;--danger:#f87171;--warn:#fbbf24;--text:#e8eaf6;--muted:#7986a3;--card:#141c30}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+  .sidebar{width:240px;min-height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;position:fixed;top:0;left:0;bottom:0;z-index:100}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:32px}
+  .brand-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .brand h1{font-size:1.1rem;font-weight:700;color:var(--text)}
+  .brand p{font-size:0.7rem;color:var(--muted)}
+  .nav-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:0 12px;margin:16px 0 6px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:0.88rem;font-weight:500;transition:all 0.18s;margin-bottom:2px}
+  .nav-item:hover,.nav-item.active{background:rgba(79,138,255,0.12);color:var(--text)}
+  .nav-item .icon{font-size:16px;width:22px;text-align:center}
+  .spacer{flex:1}
+  .user-card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px}
+  .user-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#34d399,#059669);display:flex;align-items:center;justify-content:center;font-size:16px}
+  .user-info h4{font-size:0.82rem;font-weight:600;color:var(--text)}
+  .user-info p{font-size:0.7rem;color:var(--muted)}
+
+  .main{margin-left:240px;flex:1;padding:32px;background:var(--main)}
+  .page-header{margin-bottom:28px}
+  .page-header h2{font-size:1.5rem;font-weight:700;color:var(--text)}
+  .page-header p{font-size:0.83rem;color:var(--muted);margin-top:2px}
+
+  /* Welcome Hero */
+  .hero{background:linear-gradient(135deg,rgba(79,138,255,0.18),rgba(124,58,237,0.18));border:1px solid rgba(79,138,255,0.25);border-radius:20px;padding:28px;margin-bottom:24px;display:flex;align-items:center;gap:20px}
+  .hero-avatar{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;box-shadow:0 8px 24px rgba(79,138,255,0.35)}
+  .hero-text h2{font-size:1.3rem;font-weight:700}
+  .hero-text p{color:var(--muted);font-size:0.85rem;margin-top:4px}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;transition:transform 0.2s}
+  .stat-card:hover{transform:translateY(-3px)}
+  .stat-icon{font-size:24px;margin-bottom:10px}
+  .stat-value{font-size:2rem;font-weight:800;line-height:1;margin-bottom:4px}
+  .stat-label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px}
+  .stat-card.blue .stat-value{color:var(--accent)}
+  .stat-card.green .stat-value{color:var(--success)}
+  .stat-card.gold .stat-value{color:var(--warn)}
+
+  /* Attendance ring */
+  .ring-wrap{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:24px;display:flex;gap:32px;align-items:center}
+  .ring-info h3{font-size:1rem;font-weight:700;margin-bottom:8px}
+  .ring-info p{font-size:0.83rem;color:var(--muted);margin-bottom:16px}
+  .ring-chart{width:180px;flex-shrink:0}
+
+  .status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;font-size:0.8rem;font-weight:600}
+  {% if percent >= 75 %}
+  .status-pill{background:rgba(52,211,153,0.15);color:var(--success);border:1px solid rgba(52,211,153,0.30)}
+  {% elif percent >= 50 %}
+  .status-pill{background:rgba(251,191,36,0.15);color:var(--warn);border:1px solid rgba(251,191,36,0.30)}
+  {% else %}
+  .status-pill{background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.30)}
+  {% endif %}
+
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
+  .panel h3{font-size:0.95rem;font-weight:700;margin-bottom:16px}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+  td{padding:11px 12px;font-size:0.88rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(255,255,255,0.025)}
+  .dot-green{width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;margin-right:6px}
+  .btn-dl{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.18s}
+  .btn-dl:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(79,138,255,0.35)}
+  .empty{text-align:center;padding:30px;color:var(--muted);font-size:0.85rem}
+  .empty .icon{font-size:36px;display:block;margin-bottom:10px}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">👁️</div>
+    <div><h1>FaceAttend</h1><p>Student Panel</p></div>
+  </div>
+  <span class="nav-label">Navigation</span>
+  <a href="/student" class="nav-item active"><span class="icon">📊</span>Dashboard</a>
+  <a href="/profile" class="nav-item"><span class="icon">👤</span>My Profile</a>
+  <a href="/download" class="nav-item"><span class="icon">📥</span>Download Report</a>
+  <div class="spacer"></div>
+  <div class="user-card">
+    <div class="user-avatar">🎓</div>
+    <div class="user-info"><h4>{{ name | title }}</h4><p>Student Account</p></div>
+  </div>
+  <a href="/logout" class="nav-item" style="margin-top:8px;color:var(--danger)"><span class="icon">🚪</span>Logout</a>
+</nav>
+
+<main class="main">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-avatar">🎓</div>
+    <div class="hero-text">
+      <h2>Welcome back, {{ name | title }}!</h2>
+      <p>Here's your attendance summary for this month</p>
+    </div>
+    <div style="margin-left:auto">
+      <a href="/download" class="btn-dl">📥 Download Report</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="cards">
+    <div class="stat-card blue">
+      <div class="stat-icon">📅</div>
+      <div class="stat-value">{{ total }}</div>
+      <div class="stat-label">Total Classes</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value">{{ present }}</div>
+      <div class="stat-label">Classes Attended</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon">📈</div>
+      <div class="stat-value">{{ percent }}%</div>
+      <div class="stat-label">Attendance Rate</div>
+    </div>
+  </div>
+
+  <!-- Ring Chart -->
+  <div class="ring-wrap">
+    <div class="ring-chart">
+      <canvas id="ringChart"></canvas>
+    </div>
+    <div class="ring-info">
+      <h3>Attendance Status</h3>
+      <p>You have attended <strong>{{ present }}</strong> out of <strong>{{ total }}</strong> classes</p>
+      <div class="status-pill">
+        {% if percent >= 75 %}✅ Good Standing
+        {% elif percent >= 50 %}⚠️ At Risk
+        {% else %}❌ Low Attendance
+        {% endif %}
+      </div>
+      {% if percent < 75 %}
+      <p style="margin-top:12px;font-size:0.8rem;color:var(--danger)">
+        ⚠️ Minimum 75% required. You need {{ [((0.75 * total - present) / 0.25)|int, 0]|max }} more classes.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Records Table -->
+  <div class="panel">
+    <h3>📋 Attendance Records</h3>
+    {% if data %}
+    <table>
+      <thead><tr><th>#</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for row in data %}
+        <tr>
+          <td style="color:var(--muted)">{{ loop.index }}</td>
+          <td>{{ row[0] }}</td>
+          <td>{{ row[1] }}</td>
+          <td><span class="dot-green"></span>Present</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><span class="icon">📭</span>No attendance records found yet</div>
+    {% endif %}
+  </div>
+</main>
+
+<script>
+  const ctx = document.getElementById('ringChart').getContext('2d');
+  const pct = Number('{{ percent }}');
+  const color = pct >= 75 ? 'rgba(52,211,153,0.9)' : pct >= 50 ? 'rgba(251,191,36,0.9)' : 'rgba(248,113,113,0.9)';
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [Number('{{ present }}'), Number('{{ total }}') - Number('{{ present }}')],
+        backgroundColor: [color, 'rgba(255,255,255,0.06)'],
+        borderColor: [color, 'rgba(255,255,255,0.08)'],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '72%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.parsed}` }
+        }
+      }
+    },
+    plugins: [{
+      id: 'center',
+      beforeDraw(chart) {
+        const { width, height, ctx } = chart;
+        ctx.save();
+        ctx.font = 'bold 28px Outfit';
+        ctx.fillStyle = '#e8eaf6';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pct + '%', width/2, height/2);
+        ctx.restore();
+      }
+    }]
+  });
+</script>
+</body>
+</html>

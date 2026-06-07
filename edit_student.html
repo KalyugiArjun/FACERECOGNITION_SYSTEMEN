@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Student</title>
+</head>
+<body>
+
+<h2>Edit Student</h2>
+
+<form action="/update_student" method="POST">
+
+<input type="text" name="name" value="{{student[0]}}" required>
+<input type="text" name="enrollment" value="{{student[1]}}" readonly>
+<input type="text" name="department" value="{{student[2]}}" required>
+<input type="text" name="year" value="{{student[3]}}" required>
+
+<button>Update</button>
+
+</form>
+
+</body>
+</html>

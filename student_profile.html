@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Profile</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI;
+background:#0f2027;
+display:flex;
+color:white;
+}
+
+.sidebar{
+width:220px;
+height:100vh;
+background:#111;
+padding:20px;
+}
+
+.sidebar h2{color:#00f2fe;}
+
+.sidebar a{
+display:block;
+margin:20px 0;
+color:white;
+text-decoration:none;
+}
+
+.sidebar a:hover{
+color:#ff00ff;
+}
+
+.main{
+flex:1;
+padding:20px;
+background:#203a43;
+}
+
+.profile-card{
+background:#111;
+padding:30px;
+border-radius:10px;
+box-shadow:0 0 15px #00f2fe;
+width:60%;
+margin:auto;
+margin-top:30px;
+text-align:center;
+}
+
+.profile-img{
+width:130px;
+height:130px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #00f2fe;
+margin-bottom:10px;
+}
+
+.details{
+text-align:left;
+margin-top:20px;
+}
+
+.details p{
+padding:8px;
+border-bottom:1px solid #444;
+}
+
+.edit-form{
+display:none;
+margin-top:20px;
+}
+
+input,select{
+width:95%;
+padding:10px;
+margin:5px;
+border:none;
+border-radius:5px;
+}
+
+.btn{
+padding:10px 20px;
+background:#00f2fe;
+border:none;
+cursor:pointer;
+margin-top:10px;
+border-radius:5px;
+}
+
+.btn:hover{
+background:#ff00ff;
+color:white;
+}
+
+</style>
+
+<script>
+function editProfile(){
+document.getElementById("viewMode").style.display="none";
+document.getElementById("editMode").style.display="block";
+}
+</script>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+<h2>Student Panel</h2>
+<a href="/student">Dashboard</a>
+<a href="/profile">My Profile</a>
+<a href="/logout">Logout</a>
+</div>
+
+<div class="main">
+
+<div class="profile-card">
+
+<h2>My Profile</h2>
+
+{% if profile[5] %}
+<img src="/static/profile/{{profile[5]}}" class="profile-img">
+{% else %}
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-img">
+{% endif %}
+
+<!-- ================= VIEW MODE ================= -->
+
+<div id="viewMode" class="details">
+
+<p><b>Name:</b> {{profile[0]}}</p>
+<p><b>Enrollment:</b> {{profile[1]}}</p>
+<p><b>Department:</b> {{profile[2]}}</p>
+<p><b>Year:</b> {{profile[3]}}</p>
+<p><b>Username:</b> {{profile[4]}}</p>
+
+<center>
+<button class="btn" onclick="editProfile()">Update Profile</button>
+</center>
+
+</div>
+
+<!-- ================= EDIT MODE ================= -->
+
+<div id="editMode" class="edit-form">
+
+<form action="/update_profile" method="POST" enctype="multipart/form-data">
+
+<input type="text" name="name" value="{{profile[0]}}" required>
+<input type="text" value="{{profile[1]}}" readonly>
+<input type="text" name="department" value="{{profile[2]}}" required>
+<input type="text" name="year" value="{{profile[3]}}" required>
+<input type="file" name="image">
+<input type="password" name="password" placeholder="New Password">
+
+<button type="submit" class="btn">Save Changes</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

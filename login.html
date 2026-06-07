@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaceAttend — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg1: #0a0e1a;
+    --bg2: #0d1526;
+    --glass: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.10);
+    --accent: #4f8aff;
+    --accent2: #7c3aed;
+    --success: #34d399;
+    --text: #e8eaf6;
+    --muted: #7986a3;
+    --danger: #f87171;
+  }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    background: var(--bg1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Animated background blobs */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    animation: float 8s ease-in-out infinite;
+  }
+  .blob1 { width: 480px; height: 480px; background: #4f8aff; top: -100px; left: -120px; animation-delay: 0s; }
+  .blob2 { width: 360px; height: 360px; background: #7c3aed; bottom: -80px; right: -80px; animation-delay: 3s; }
+  .blob3 { width: 260px; height: 260px; background: #34d399; top: 50%; left: 60%; animation-delay: 5s; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.06); }
+  }
+
+  /* Grid texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .card {
+    position: relative;
+    z-index: 10;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 44px 40px;
+    width: 420px;
+    backdrop-filter: blur(24px);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05) inset;
+    animation: slideUp 0.6s cubic-bezier(0.23,1,0.32,1) both;
+  }
+
+  @keyframes slideUp {
+    from { opacity:0; transform: translateY(40px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .brand-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 8px 24px rgba(79,138,255,0.35);
+  }
+
+  .brand-text h1 { font-size: 1.4rem; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .brand-text p  { font-size: 0.78rem; color: var(--muted); font-weight: 400; }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin-bottom: 28px;
+  }
+
+  .tagline { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+  .tagline span { color: var(--accent); font-weight: 600; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+
+  .input-wrap { position: relative; }
+  .input-wrap .icon {
+    position: absolute;
+    left: 14px; top: 50%; transform: translateY(-50%);
+    font-size: 16px; opacity: 0.5;
+    pointer-events: none;
+  }
+
+  input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,138,255,0.18);
+    background: rgba(79,138,255,0.06);
+  }
+
+  .btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    box-shadow: 0 8px 24px rgba(79,138,255,0.30);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(79,138,255,0.40); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.05);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    margin-top: 10px;
+    font-size: 0.88rem;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+
+  {% if error %}
+  .error-msg {
+    background: rgba(248,113,113,0.12);
+    border: 1px solid rgba(248,113,113,0.30);
+    color: var(--danger);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  {% endif %}
+
+  .footer { text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+
+  <div class="card">
+    <div class="brand">
+      <div class="brand-icon">👁️</div>
+      <div class="brand-text">
+        <h1>FaceAttend</h1>
+        <p>AI-Powered Attendance System</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <p class="tagline">Welcome back — sign in to your <span>dashboard</span></p>
+
+    {% if error %}
+    <div class="error-msg">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <form action="/login" method="post">
+      <div class="field">
+        <label>Username</label>
+        <div class="input-wrap">
+          <span class="icon">👤</span>
+          <input type="text" name="username" placeholder="Enter your username" required autocomplete="username">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="icon">🔒</span>
+          <input type="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">🚀 Sign In</button>
+    </form>
+
+    <a href="/register_page">
+      <button class="btn btn-ghost">✨ New Student? Register Here</button>
+    </a>
+
+    <div class="footer">FaceAttend v2.0 &nbsp;•&nbsp; Secure &nbsp;•&nbsp; AI-Powered</div>
+  </div>
+</body>
+</html>
